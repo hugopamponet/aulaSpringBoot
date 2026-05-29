@@ -1,43 +1,42 @@
 package br.com.pratica.login.controller;
 
-import br.com.pratica.login.model.UsuarioModel;
-import br.com.pratica.login.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import br.com.pratica.login.service.UsuarioService;
+import br.com.pratica.login.dto.LoginDto;
+import br.com.pratica.login.dto.UsuarioDto;
 
 @RestController
-@RequestMapping("/autenticacao")
+@RequestMapping("/usuarios")
+@CrossOrigin("*")
 public class UsuarioController {
-    
-    private final UsuarioService service;
-    
-    public UsuarioController(UsuarioService service){
-        this.service = service;
+
+    @Autowired
+    private UsuarioService service;
+
+    @PostMapping("/cadastrar")
+    public UsuarioDto cadastrar(@RequestBody UsuarioDto usuario) {
+
+        return service.cadastro(usuario);
     }
-    
-    @PostMapping("/cadastro")
-    public UsuarioModel cadastrar(@RequestBody UsuarioModel usuarioModel){
-        return service.cadastro(usuarioModel);
-    }
-    
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioModel usuarioModel){
+    public ResponseEntity<String> login(@RequestBody LoginDto usuario) {
+
         boolean autenticado =
-                service.autenticar(
-                        request.getNome(),
-                        request.getSenha()
-                );
-        
-        if(autenticado){
-            return ResponseEntity.ok("Login realizado com sucesso");
+                service.login(
+                        usuario.getNome(),
+                        usuario.getSenha());
+
+        if (autenticado) {
+            return ResponseEntity.ok("Login realizado com sucesso!");
         }
-        
+
         return ResponseEntity
-                .badRequest()
-                .body("Usuário ou senha incorretos.");
-}
-}
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Usuário ou senha inválidos!");
+    }
 }
